@@ -283,7 +283,7 @@ INNER JOIN dbo.DimSalesTerritory t
 ON t.SalesTerritoryKey = s.SalesTerritoryKey
 WHERE d.FiscalYear = 2004
 AND t.SalesTerritoryGroup = 'North America'
-OPTION (LABEL = 'STATEMENT:RoundRobinQuery');
+OPTION (LABEL = 'STATEMENT:ReplicatedTableQuery');
 
 -- Get list of operations
 SELECT step_index, operation_type
