@@ -213,7 +213,18 @@ JOIN sys.pdw_table_mappings AS TMap ON NTables.name = TMap.physical_name
 AND substring(TMap.physical_name,40, 10) = pnp.distribution_id
 JOIN sys.objects AS o
 ON TMap.object_id = o.object_id
-WHERE o.name in ('DimDate') ORDER BY distribution_id;
+WHERE o.name in ('DimDate') ORDER BY distribution_id; 
+			    
+-- Compare the difference with DimDate_old (HASH distribution)
+
+SELECT
+o.name AS tableName, pnp.pdw_node_id, pnp.distribution_id, pnp.rows FROM sys.pdw_nodes_partitions AS pnp JOIN sys.pdw_nodes_tables AS NTables ON pnp.object_id = NTables.object_id
+AND pnp.pdw_node_id = NTables.pdw_node_id
+JOIN sys.pdw_table_mappings AS TMap ON NTables.name = TMap.physical_name
+AND substring(TMap.physical_name,40, 10) = pnp.distribution_id
+JOIN sys.objects AS o
+ON TMap.object_id = o.object_id
+WHERE o.name in ('DimDate_old') ORDER BY distribution_id
 
 -- Sales Sum
 SELECT TotalSalesAmount = SUM(SalesAmount)
@@ -227,6 +238,14 @@ AND t.SalesTerritoryGroup = 'North America'
 OPTION (LABEL = 'STATEMENT:RoundRobinQuery');
 
 
+-- List of steps
+
+SELECT step_index, operation_type
+FROM sys.dm_pdw_exec_requests er
+JOIN sys.dm_pdw_request_steps rs
+ON er.request_id = rs.request_id
+WHERE er.[label] = 'STATEMENT:RoundRobinQuery';
+			    
 -- Create dim tables with REPLICATE distribution method
 CREATE TABLE dbo.DimSalesTerritory_REPLICATE WITH
 (
@@ -425,6 +444,19 @@ CREATE TABLE dbo.Orders_Staging
 ,OrderDescription char(15) DEFAULT 'NewOrder'
 );
 
+-- Check the partitions
+
+SELECT
+o.name AS Table_name, pnp.partition_number AS Partition_number, sum(pnp.rows) AS Row_count
+FROM sys.pdw_nodes_partitions AS pnp
+JOIN sys.pdw_nodes_tables AS NTables ON pnp.object_id = NTables.object_id
+AND pnp.pdw_node_id = NTables.pdw_node_id
+JOIN sys.pdw_table_mappings AS TMap ON NTables.name = TMap.physical_name
+AND substring(TMap.physical_name,40, 10) = pnp.distribution_id
+JOIN sys.objects AS o ON TMap.object_id = o.object_id
+WHERE o.name in ('Orders_Staging')
+GROUP BY partition_number, o.name, pnp.data_compression_desc;
+			    
 --switch partitions
 ALTER TABLE dbo.OrdersPartition SWITCH PARTITION 3 to dbo.Orders_Staging;
 
