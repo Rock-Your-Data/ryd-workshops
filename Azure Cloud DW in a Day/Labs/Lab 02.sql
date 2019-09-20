@@ -68,10 +68,19 @@ ON ptdp.object_id = o.object_id
 WHERE ptdp.object_id = object_id('FactInternetSalesWithoutDistr')
 OR ptdp.object_id = object_id('FactInternetSalesWithDistr');
 
-
+--exercise 3
 -- Create table with round-robin distribution
-	-- Insert Date
-	-- View data in individual distributions
+CREATE TABLE dbo.Orders
+(
+OrderID int IDENTITY(1,1) NOT NULL
+,OrderDate datetime NOT NULL
+,OrderDescription char(15) DEFAULT 'NewOrder' )
+WITH
+( CLUSTERED INDEX (OrderID)
+, DISTRIBUTION = ROUND_ROBIN
+);			    
+-- Insert Date
+-- View data in individual distributions
 SET NOCOUNT ON
 DECLARE @i INT SET @i = 1
 DECLARE @date DATETIME SET @date = dateadd(mi,@i,'2019-08-01') WHILE (@i <= 60)
