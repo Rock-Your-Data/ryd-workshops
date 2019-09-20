@@ -290,7 +290,7 @@ SELECT step_index, operation_type
 FROM sys.dm_pdw_exec_requests er
 JOIN sys.dm_pdw_request_steps rs
 ON er.request_id = rs.request_id
-WHERE er.[label] = 'STATEMENT:RoundRobinQuery';
+WHERE er.[label] = 'STATEMENT:ReplicatedTableQuery';
 
 -- Getting Sales Amount
 SELECT TotalSalesAmount = SUM(SalesAmount)
