@@ -2,13 +2,13 @@
 
 ## Summary
 Join Rock Your Data and Matillion and learn best practices for Cloud Analytics and Data Integration. Find out the differences between ETL and ELT from Matillion and see their built for the cloud product on a live demo.
-You will hear real world use cases about data warehouse modernization and cloud data migration projects from industry experts. Finally, a hands-on opportunity where you will learn more on unlocking the potential of your data with Matillion's cloud-based approach to data transformation.
+You will hear real-world use cases about data warehouse modernization and cloud data migration projects from industry experts. Finally, a hands-on opportunity where you will learn more about unlocking the potential of your data with Matillion's cloud-based approach to data transformation.
 
 ## Getting Matillion Trial
 For this workshop, we will use the Orbitera platform where we will launch the Matillion EC2 instance. 
 1. Click on the link [Matillion Trial](https://matillion.orbitera.com/c2m/customer/testDrives/index)
 2. Sign Up using your and your company information
-3. Launch **Matillion ETL for Snowflake**. It will take 10-20 minutes to provision Matillion instance and you will get an email with URL, login, and password. 
+3. Launch **Matillion ETL for Snowflake**. It will take 10-20 minutes to provision a Matillion instance and you will get an email with URL, login, and password. 
 
 ## Connecting Matillion
 1. Open the URL that you've got from **Orbitera**. Enter credentials.
@@ -26,8 +26,7 @@ Open the **dim_airoports_setup**. Click the right button and choose **Run Job (t
 
 Then it will execute the transforamtion job **dim_airports**. It will query **matillion_stg_airports**, apply transformation logic and write into the dimension tables **matillion_dim_airoports**.
 
-Matillion allows us to organize jobs in folders. Let's also create a folder **101**. 
-> You can download file from repo *Cloud Data Integration 101.json* and import it to the Matillion via Project->Import. It has 3 jobs that we will create. You may need to update S3 bucket for rds one based on your email from Orbitera.
+Matillion allows us to organize jobs in folders. Let's also create a folder **101**.
 
 ## Loading data from S3:
 Ok, we ran existing jobs and we got some data in Snowflake. Let's create another job.
@@ -44,11 +43,11 @@ Ok, we ran existing jobs and we got some data in Snowflake. Let's create another
 
 6. Under the properties of **Create/Replace Table**, we specify *Replace* option, give a new name for a new table *stg_flights*.  
 7. Under the properties of **S3 Load** change the table name for *stg_flights* and change the option **On Error** to **Continue**. It will help to continue load in case of failure.
-8. We can click anywhere on canvas with right button and choose **Run Job (test)**. You may notice in right bottom the Task bar. It gives us detail information about the job run.
-9. When job finish to run click on small arrow signe in Tasks window. It will open new tabe and you can find how many rows were insreted into *stg_flights* tables.
+8. We can click anywhere on canvas with the right button and choose **Run Job (test)**. You may notice in the right bottom the Taskbar. It gives us detail information about the job run.
+9. When the job finished to run click on a small arrow sign in the Tasks window. It will open a new tab and you can find how many rows were inserted into *stg_flights* tables.
 
-## Loading data from transactional database
-In this case we will use RDS databse. 
+## Loading data from the transactional database
+In this case, we will use the RDS database. 
 >RDS - Amazon Relational Database Service is a distributed relational database service by Amazon Web Services. It is a web service running "in the cloud" designed to simplify the setup, operation, and scaling of a relational database for use in applications.
 
 1. Click right button on **101** in left upper corner and choose **Add Orchestration Job** with name *fact_flights_setup_rds*.
@@ -69,19 +68,19 @@ RDS Endpoint: metlrds.c16gwuxkvj5t.eu-west-1.rds.amazonaws.com
 ## Adding Business Logic with Transformation Job
 
 1. Click right button on **101** in left upper corner and choose **Add Transformation Job** with name *fact_flights*.
-2. Add **Tablea Input** component. 
+2. Add **Table Input** component. 
 >Tableau Input - Read chosen columns from an input table or view into the job.
 3. Choose the source table **stg_flights** and add all **Column Names**.
 4. Click **SQL** tab and you will see what Matillion does with data
 ```sql 
 SELECT 
-  "iata", 
-  "airport", 
-  "city", 
-  "state", 
-  "country", 
-  "lat", 
-  "long" 
+  "iata", 
+  "airport", 
+  "city", 
+  "state", 
+  "country", 
+  "lat", 
+  "long" 
 FROM "SQXLKDNY"."PUBLIC"."stg_flights" 
 ```
 5. Check the data sample. Click on **Sample** tab and click **Data**. Matillion will show you sample of data.
@@ -97,15 +96,15 @@ WHERE (NOT("ArrTime" = 'NA'))
 * Name: arrival delay
 * Logic: CASE WHEN "ArrTime" - "CRSArrTime" < 0 THEN 0 ELSE "ArrTime" - "CRSArrTime" END
 
-The data we have now is giving us the delay, where applicable, for all flights, sorted by year and month number. We will add month name. We can use **Calculator step** and write *CASE* statement or we can leverage Matillion component - **Fixed Flow**.
->Fixed Flow - Allows you to generate lines of fixed input, or input from variables. Useful for simple static mappings
+The data we have now is giving us the delay, where applicable, for all flights, sorted by year and month number. We will add a month's name. We can use **Calculator step** and write *CASE* statement or we can leverage Matillion component - **Fixed Flow**.
+>Fixed Flow - Allows you to generate lines of fixed input or input from variables. Useful for simple static mappings
 
 1. Drag and drop **Fixed Flow**
 2. Edit properties and create new column names:
 * **MonthNumber** as NUMBER, size 2
-* **MonthName** as VARCHAER, size 10
-3. Fillthe Values parameters. You can copy paste this into your component:
-`<1	January
+* **MonthName** as VARCHAR, size 10
+3. Fill the Value parameters. You can copy-paste this into your component with **Text Mode**:
+1	January
 2	February
 3	March
 4	April
@@ -116,7 +115,34 @@ The data we have now is giving us the delay, where applicable, for all flights, 
 9	September
 10	October
 11	November
-12	December >`
+12	December
+4. Add **Join** component and connect both data flows.
+>Join - Join 2 or more input flows into a single output.
+5. Specify the main table as **Calculator 0** with alias **f** 
+6. Add *inner join* with **Fixed Flow 0** with alias **m**.
+7. Specify the join condition as *"f"."Month"="m"."MonthNumber"*
+8. Specify output components by add all - **Add All**.
+9. To get average delay by month, we will use the **Aggregate** component. 
+>Aggregate - This component works by grouping multiple input rows into a single output row. Input columns can be added to the groupings, or have an aggregation applied to them.
+10. In **Aggregate** component properties we will aggregate:
+* *arrival delay* with *Sum*
+* *FlightNum* with *Count*
+and group by *MonthName*
+We can review the begin of the SQL:
+```sql
+SELECT 
+  "MonthName", 
+  SUM("arrival delay") AS "sum_arrival delay", 
+  COUNT("FlightNum") AS "count_FlightNum" 
+FROM ($T{Join 0}) 
+GROUP BY "MonthName"
+```
+11. Next, we will calculate average delay. Drag and drop another **Calculator** component and connect it with **Aggregate** component. 
+12. Create new column name *avg delay by month* with logic *"sum_arrival delay"/"count_FlightNum"*. Review the data with Sample.
+13. Drag and drop **Rewrite Tablea** component and connect with **Calculator**
+>Rewrite Table - Write the input data flow out to a new table. It will create table during the run.
+14. Add table name *flight_delay* and run the job.
+
 
 
 
