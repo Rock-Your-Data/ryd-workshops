@@ -81,12 +81,17 @@ SELECT
   "country", 
   "lat", 
   "long" 
-FROM "SQXLKDNY"."PUBLIC"."stg_flights"
+FROM "SQXLKDNY"."PUBLIC"."stg_flights" 
 ```
 5. Check the data sample. Click on **Sample** tab and click **Data**. Matillion will show you sample of data.
 6. Add **Filter** component and connect with **Tablea Input**.
 > Filter - Filter rows from the input to pass a subset of rows to the next component based on a set of conditions. (WHERE condition)
-7. Change the **Filter** properties to *AirTime Not Equal to NA*.
+7. Change the **Filter** properties to *AirTime Not Equal to NA*. It is the same as 
+```sql 
+WHERE (NOT("ArrTime" = 'NA')) 
+```
+8. Let's add **Calculator** component. 
+>Calculator - Adds new columns by performing calculations. Each row in produces one row of output. Any pre-existing columns that share a name with a created column will be overwritten.
 
 
 
