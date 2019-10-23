@@ -91,7 +91,32 @@ FROM "SQXLKDNY"."PUBLIC"."stg_flights"
 WHERE (NOT("ArrTime" = 'NA')) 
 ```
 8. Let's add **Calculator** component. 
->Calculator - Adds new columns by performing calculations. Each row in produces one row of output. Any pre-existing columns that share a name with a created column will be overwritten.
+>Calculator - Adds new columns by performing calculations. Each row in produces one row of output. Any pre-existing columns that share a name with a created column will be overwritten. 
+9. In the **Calculator** component we will calculate the arrival delay using the arrival time *ArrTime* and scheduled arrival time *CRSArrTime*. Click **Properties** and it will open new window. Click **+** and specify the new column details.
+* Name: arrival delay
+* Logic: CASE WHEN "ArrTime" - "CRSArrTime" < 0 THEN 0 ELSE "ArrTime" - "CRSArrTime" END
+
+The data we have now is giving us the delay, where applicable, for all flights, sorted by year and month number. We will add month name. We can use **Calculator step** and write *CASE* statement or we can leverage Matillion component - **Fixed Flow**.
+>Fixed Flow - Allows you to generate lines of fixed input, or input from variables. Useful for simple static mappings
+
+1. Drag and drop **Fixed Flow**
+2. Edit properties and create new column names:
+* **MonthNumber** as NUMBER, size 2
+* **MonthName** as VARCHAER, size 10
+3. Fillthe Values parameters. You can copy paste this into your component:
+`<1	January
+2	February
+3	March
+4	April
+5	May
+6	June
+7	July
+8	August
+9	September
+10	October
+11	November
+12	December >`
+
 
 
 
