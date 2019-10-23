@@ -26,7 +26,8 @@ Open the **dim_airoports_setup**. Click the right button and choose **Run Job (t
 
 Then it will execute the transforamtion job **dim_airports**. It will query **matillion_stg_airports**, apply transformation logic and write into the dimension tables **matillion_dim_airoports**.
 
-Matillion allows us to organize jobs in folders. Let's also create a folder **101**.
+Matillion allows us to organize jobs in folders. Let's also create a folder **101**. 
+> You can download file from repo *Cloud Data Integration 101.json* and import it to the Matillion via Project->Import. It has 3 jobs that we will create. You may need to update S3 bucket for rds one based on your email from Orbitera.
 
 ## Loading data from S3:
 Ok, we ran existing jobs and we got some data in Snowflake. Let's create another job.
